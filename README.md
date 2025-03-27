@@ -1,7 +1,7 @@
-# LightLM - <150M Parameter Language Model
+# pufferfish - <150M\x+ Parameter Language Model
 
-**LightLM** is a language model with up to 150M parameters.
-This repository explores the limits of small language models, pushing how smart they can be. LightLM integrates the latest architectural innovations and dataset improvements to enhance the coherence of its output. 
+**pufferfish** is a language model with up to 150M parameters. that scales upwards
+This repository explores the limits of small language models, pushing how smart they can be. and tests novel inovations pufferfish integrates the latest architectural innovations and dataset improvements to enhance the coherence of its output. 
 
 ## Current LightLM
 ### Model Architecture
@@ -13,6 +13,7 @@ This repository explores the limits of small language models, pushing how smart 
 - **RMSNormalization**
 - **Optional Mixture of Experts (MoE)**
 - **Loss-free Load balancing and DeepSeekMoE**
+- ** adaptive resonance in attention 
 
 ### Dataset
 The model was trained on the [Cosmopedia v2](https://huggingface.co/datasets/HuggingFaceTB/cosmopedia) dataset (~28 billion tokens). 
