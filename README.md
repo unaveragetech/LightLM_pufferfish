@@ -5,6 +5,7 @@
 ![License](https://img.shields.io/badge/license-SDUC-red)
 ![Python](https://img.shields.io/badge/python-3.8%2B-blue)
 ![PyTorch](https://img.shields.io/badge/pytorch-2.0%2B-orange)
+![Mermaid](https://img.shields.io/badge/Mermaid-2.0%2B-yellow)
 
 **Pufferfish** (evolved from LightLM) is a lightweight language model framework designed for training and fine-tuning transformer models on consumer-grade hardware. It focuses on efficiency, adaptability, and ease of use, making language model experimentation accessible to researchers and developers with limited computational resources.
 
