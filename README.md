@@ -1,4 +1,5 @@
 # Pufferfish (formerly LightLM) - Efficient Language Model Training on Consumer Hardware
+[white paper](Compute_on_a_Budget_White_Paper_revised.md)
 
 ![Pufferfish Logo](https://img.shields.io/badge/Pufferfish-Efficient%20LLM%20Training-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
