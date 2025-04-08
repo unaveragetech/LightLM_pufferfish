@@ -5,4 +5,6 @@
 /.ipynb_checkpoints/
 /venv/
 /datasets/
+/data/dataset_cache/
+/fineweb-edu_tok-10BT/
 
