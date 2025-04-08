@@ -2,7 +2,7 @@
 [white paper](Compute_on_a_Budget_White_Paper_revised.md)
 
 ![Pufferfish Logo](https://img.shields.io/badge/Pufferfish-Efficient%20LLM%20Training-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
+![License](https://img.shields.io/badge/license-SDUC-red)
 ![Python](https://img.shields.io/badge/python-3.8%2B-blue)
 ![PyTorch](https://img.shields.io/badge/pytorch-2.0%2B-orange)
 
