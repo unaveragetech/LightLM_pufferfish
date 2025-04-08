@@ -132,13 +132,36 @@ def wino(model, save_name, temp=0.25):
 
 
 def eval_model(checkpoint_path, temp=0.25, save_name="model"):
+    """
+    Evaluate model on benchmarks
+    Returns: dict with evaluation results
+    """
+    results = {}
     
-    model = Transformer.from_pretrained(checkpoint_path)
-        
+    model = Transformer(config)
+    checkpoint = torch.load(checkpoint_path)
+    model.load_state_dict(checkpoint['model'])
+    
     model = model.to(device)
     model.eval()
     
-    arc(model, f"{save_name}", temp)
-    wino(model, f"{save_name}", temp)
+    # Run evaluations
+    arc_result = arc(model, save_name, temp)
+    wino_result = wino(model, save_name, temp)
+    
+    results = {
+        "arc_accuracy": arc_result,
+        "wino_accuracy": wino_result
+    }
+    
+    # Save to file
+    with open('evaluation.txt', 'a') as f:
+        f.write(f"\n=== Evaluation for {save_name} ===\n")
+        f.write(f"Checkpoint: {checkpoint_path}\n")
+        f.write(f"ARC Accuracy: {arc_result * 100:.2f}%\n")
+        f.write(f"WinoGrande Accuracy: {wino_result * 100:.2f}%\n")
+        f.write("=" * 50 + "\n")
+    
+    return results
 
 eval_model("./model_FFN")

@@ -13,6 +13,22 @@ from torch.distributed import init_process_group, destroy_process_group
 
 import os
 
+try:
+    from rich.console import Console
+    from rich.panel import Panel
+    console = Console()
+except ImportError:
+    class FallbackConsole:
+        def print(self, text, *args, **kwargs):
+            if isinstance(text, Panel):
+                print(text.renderable)
+            else:
+                print(text)
+    console = FallbackConsole()
+    class Panel:
+        def __init__(self, text, title=None):
+            self.renderable = f"\n{title if title else ''}\n{text}\n"
+
 torch.cuda.empty_cache()
 
 tokenizer_id = "HuggingFaceTB/SmolLM-360M"

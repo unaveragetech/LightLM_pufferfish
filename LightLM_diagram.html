@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>LightLM System Workflow</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.0/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        .mermaid {
+            margin: 30px 0;
+        }
+        .step {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .command {
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-left: 4px solid #666;
+            margin: 10px 0;
+            font-family: monospace;
+        }
+        .output {
+            background-color: #f8f8f8;
+            padding: 10px;
+            border-left: 4px solid #999;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .explanation {
+            margin-top: 10px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <h1>LightLM System Workflow</h1>
+    
+    <div class="mermaid">
+        graph TD
+            %% Main components of the LightLM system
+            subgraph "User Interface"
+                UI[Training Setup Menu]
+                GenUI[Text Generation Interface]
+            end
+
+            subgraph "Configuration"
+                TC[TrainerConfig]
+                MC[ModelConfig]
+                OPT[Optimizer]
+            end
+
+            subgraph "Data Pipeline"
+                DS[Dataset Loading]
+                TDL[ThreadedDataLoader]
+                TOK[Tokenizer]
+                Q[Data Queue]
+            end
+
+            subgraph "Model Architecture"
+                TR[Transformer]
+                ATT[Attention Layers]
+                FFN[Feed Forward Networks]
+                EMB[Token Embeddings]
+            end
+
+            subgraph "Training Process"
+                TRAIN[Trainer]
+                OPT_TIME[Training Time Optimizer]
+                SUBSET[Subset Mode]
+                CKPT[Checkpointing]
+            end
+
+            subgraph "Generation Process"
+                GEN[Text Generation]
+                LOAD[Model Loading]
+            end
+
+            %% Connections between components
+            UI --> TC
+            UI --> OPT_TIME
+            OPT_TIME --> TC
+            OPT_TIME --> SUBSET
+            OPT_TIME --> MC
+            
+            TC --> TRAIN
+            MC --> TR
+            
+            DS --> TDL
+            TDL --> TOK
+            TDL --> Q
+            SUBSET --> TDL
+            
+            Q --> TRAIN
+            TRAIN --> TR
+            TRAIN --> CKPT
+            
+            TR --> ATT
+            TR --> FFN
+            TR --> EMB
+            
+            CKPT --> LOAD
+            LOAD --> GEN
+            GenUI --> GEN
+            TOK --> GEN
+
+            %% Styling for different component types
+            classDef process fill:#f9f,stroke:#333,stroke-width:2px
+            classDef config fill:#bbf,stroke:#333,stroke-width:2px
+            classDef data fill:#bfb,stroke:#333,stroke-width:2px
+            classDef model fill:#fbb,stroke:#333,stroke-width:2px
+            classDef ui fill:#ffd,stroke:#333,stroke-width:2px
+            
+            class TRAIN,OPT_TIME,SUBSET,CKPT,GEN,LOAD process
+            class TC,MC,OPT config
+            class DS,TDL,TOK,Q data
+            class TR,ATT,FFN,EMB model
+            class UI,GenUI ui
+    </div>
+
+    <h2>LightLM System Workflow Guide</h2>
+    <p>This document explains the workflow of the LightLM system, including commands to run at each step and expected outputs.</p>
+
+    <div class="step">
+        <h3>1. System Setup</h3>
+        <div class="command">
+            python -m venv venv<br>
+            source venv/bin/activate  # On Windows: venv\Scripts\activate<br>
+            pip install -r requirements.txt
+        </div>
+        <div class="output">Successfully installed torch transformers datasets rich ...</div>
+        <div class="explanation">
+            This sets up a virtual environment and installs all required dependencies.
+        </div>
+    </div>
+
+    <div class="step">
+        <h3>2. Training Configuration</h3>
+        <div class="command">python train.py</div>
+        <div class="output">
+System Check:
+✓ Python Version: Python 3.11 detected ✓
+✓ GPU Status: GPU detected ✓
+✓ Disk Space: Disk space: 22.0GB free ✓
+✓ RAM: RAM: 15.8GB ✓
+✓ Tokenizer loaded successfully
+
+Training Setup
+1. Start training
+2. Manage dataset/configuration
+3. Exit
+
+Select option (1-3):
+        </div>
+        <div class="explanation">
+            The system performs hardware checks to ensure your system meets requirements.<br>
+            Select option 2 to manage dataset and configuration.
+        </div>
+    </div>
+
+    <div class="step">
+        <h3>3. Dataset and Configuration Management</h3>
+        <div class="command">2  # Select option 2 from previous menu</div>
+        <div class="output">
+Dataset and Configuration Management
+1. Change dataset
+2. Load existing configuration
+3. Create new configuration
+4. Save current configuration
+5. Optimize for training time
+6. Continue with current settings
+7. Exit
+        </div>
+        <div class="explanation">
+            Option 1: Change the dataset (default is wikitext)<br>
+            Option 5: Optimize configuration for specific training time
+        </div>
+    </div>
+
+    <div class="step">
+        <h3>4. Training Time Optimization</h3>
+        <div class="command">
+5  # Select option 5 from previous menu<br>
+Enter desired training time in hours (e.g., 24.0): 0.001
+        </div>
+        <div class="output">
+Starting Comprehensive Configuration Optimization
+Target training time: 0.001000 hours
+
+Hardware Capabilities:
+→ Maximum batch size: 12
+→ Available GPU memory: 8.0GB
+→ Flash Attention support: False
+→ GPU Compute Capability: 6.1
+
+Optimizing for ultra-fast testing mode (sub-second)
+
+Speed Optimizations:
+→ Dataset: Using minimal subset (20 samples)
+→ Device transfers: Minimized for speed
+→ Memory tracking: Disabled for faster execution
+→ Minimized model architecture:
+  • Layers: 1
+  • Dimensions: 64
+  • Heads: 4
+
+Apply these optimizations? (y/n):
+        </div>
+        <div class="explanation">
+            Enter a small value (e.g., 0.001) for ultra-fast testing<br>
+            The system will optimize model size, batch size, and dataset size<br>
+            Type 'y' to apply these optimizations
+        </div>
+    </div>
+
+    <div class="step">
+        <h3>5. Save Configuration</h3>
+        <div class="command">4  # Select option 4 to save configuration</div>
+        <div class="output">✓ Configuration saved successfully</div>
+        <div class="explanation">
+            This saves your configuration to last_config.json for future use
+        </div>
+    </div>
+
+    <div class="step">
+        <h3>6. Start Training</h3>
+        <div class="command">
+6  # Select option 6 to continue with current settings<br>
+1  # Select option 1 to start training
+        </div>
+        <div class="output">
+✓ Model initialized successfully
+Using subset of 20 samples
+Using subset mode: 20 samples out of 36718
+Subset mode active: Using only 20 samples with 5 steps per epoch
+✓ Data loader initialized with 5 steps per epoch
+
+Initializing Trainer:
+→ Device: cuda
+→ Model type: Transformer
+→ Tokenizer: GPT2TokenizerFast
+✓ Model moved to cuda
+✓ Optimizer initialized with lr=0.0005
+
+Starting training:
+→ Total steps: 5
+→ Steps per epoch: 5
+
+Epoch 1/1
+Step 1/5 | Loss: 10.5605 | Tokens/sec: 89.24 | Memory: 89MB used
+Step 2/5 | Loss: 5.1702 | Tokens/sec: 123.77 | Memory: 89MB used
+Step 3/5 | Loss: 5.1276 | Tokens/sec: 124.10 | Memory: 89MB used
+Step 4/5 | Loss: 5.0330 | Tokens/sec: 125.39 | Memory: 89MB used
+Step 5/5 | Loss: 5.0330 | Tokens/sec: 125.39 | Memory: 89MB used
+
+Saving checkpoint to ./model_testing\epoch_1
+✓ Checkpoint saved successfully
+
+Training completed successfully! Used 20 samples
+        </div>
+        <div class="explanation">
+            The system initializes the model with the optimized configuration<br>
+            It loads only 20 samples for ultra-fast training<br>
+            Training completes in seconds with 5 steps<br>
+            Model checkpoint is saved to model_testing/epoch_1/model.pt
+        </div>
+    </div>
+
+    <div class="step">
+        <h3>7. Text Generation</h3>
+        <div class="command">python generate.py</div>
+        <div class="output">
+Text Generation Interface
+Found model in model_testing\epoch_1
+
+Loading model from: model_testing\epoch_1\model.pt
+Model size: 12.24 MB
+
+Loading model...
+✓ Model loaded successfully from model_testing\epoch_1\model.pt
+
+Model Configuration:
+→ Vocab Size: 49152
+→ Context Length: 64
+→ Model Dimensions: 64
+→ Number of Layers: 1
+
+Enter your prompt (or 'quit' to exit):
+        </div>
+        <div class="explanation">
+            The system finds and loads the trained model<br>
+            Enter a prompt to generate text (e.g., "What is the meaning of life?")<br>
+            The generated text will be random since the model was only trained on 20 samples
+        </div>
+    </div>
+
+    <div class="step">
+        <h3>8. Text Generation Example</h3>
+        <div class="command">What is the meaning of life?</div>
+        <div class="output">
+Generating...
+
+Generated text:
+What is the meaning of life? emancipation spawnedogel markers urging Antibspers dyesFold planners Methods wedham hundreds securitiesFourthtow propelled twenty Confederate Adolescentsidentiquedanchor ballistic chowedENCE skepticismriminals€™imates Chile calendar Academia...
+        </div>
+        <div class="explanation">
+            The output is random because the model was only trained on 20 samples<br>
+            For better results, train with more data and for longer time
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose',
+            flowchart: { useMaxWidth: false }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+graph TD
+    subgraph "User Interface"
+        UI[Training Setup Menu]
+        GenUI[Text Generation Interface]
+    end
+
+    subgraph "Configuration"
+        TC[TrainerConfig]
+        MC[ModelConfig]
+        OPT[Optimizer]
+    end
+
+    subgraph "Data Pipeline"
+        DS[Dataset Loading]
+        TDL[ThreadedDataLoader]
+        TOK[Tokenizer]
+        Q[Data Queue]
+    end
+
+    subgraph "Model Architecture"
+        TR[Transformer]
+        ATT[Attention Layers]
+        FFN[Feed Forward Networks]
+        EMB[Token Embeddings]
+    end
+
+    subgraph "Training Process"
+        TRAIN[Trainer]
+        OPT_TIME[Training Time Optimizer]
+        SUBSET[Subset Mode]
+        CKPT[Checkpointing]
+    end
+
+    subgraph "Generation Process"
+        GEN[Text Generation]
+        LOAD[Model Loading]
+    end
+
+    %% Connections
+    UI --> TC
+    UI --> OPT_TIME
+    OPT_TIME --> TC
+    OPT_TIME --> SUBSET
+    OPT_TIME --> MC
+    
+    TC --> TRAIN
+    MC --> TR
+    
+    DS --> TDL
+    TDL --> TOK
+    TDL --> Q
+    SUBSET --> TDL
+    
+    Q --> TRAIN
+    TRAIN --> TR
+    TRAIN --> CKPT
+    
+    TR --> ATT
+    TR --> FFN
+    TR --> EMB
+    
+    CKPT --> LOAD
+    LOAD --> GEN
+    GenUI --> GEN
+    TOK --> GEN
+
+    %% Flow descriptions
+    classDef process fill:#f9f,stroke:#333,stroke-width:2px
+    classDef config fill:#bbf,stroke:#333,stroke-width:2px
+    classDef data fill:#bfb,stroke:#333,stroke-width:2px
+    classDef model fill:#fbb,stroke:#333,stroke-width:2px
+    classDef ui fill:#ffd,stroke:#333,stroke-width:2px
+    
+    class TRAIN,OPT_TIME,SUBSET,CKPT,GEN,LOAD process
+    class TC,MC,OPT config
+    class DS,TDL,TOK,Q data
+    class TR,ATT,FFN,EMB model
+    class UI,GenUI ui

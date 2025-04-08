@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>LightLM System Detailed Workflow</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.0/dist/mermaid.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        .diagram-container {
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #ddd;
+            margin: 30px 0;
+            background-color: #f8f8f8;
+        }
+        .mermaid {
+            transform-origin: 0 0;
+            transition: transform 0.1s ease-out;
+        }
+        .zoom-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 100;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 5px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .zoom-btn {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            text-align: center;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            margin: 0 2px;
+            cursor: pointer;
+            font-weight: bold;
+            user-select: none;
+        }
+        .zoom-btn:hover {
+            background-color: #f0f0f0;
+        }
+        .zoom-level {
+            display: inline-block;
+            width: 50px;
+            text-align: center;
+            font-size: 14px;
+        }
+        .legend {
+            margin: 20px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .legend-item {
+            display: inline-block;
+            margin-right: 20px;
+        }
+        .legend-color {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+        .ui-color { background-color: #ffd; }
+        .config-color { background-color: #bbf; }
+        .data-color { background-color: #bfb; }
+        .model-color { background-color: #fbb; }
+        .process-color { background-color: #f9f; }
+        .reset-btn {
+            display: inline-block;
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        .reset-btn:hover {
+            background-color: #45a049;
+        }
+
+        /* Command Reference Styling */
+        .step-container {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .command-box, .output-box, .explanation-box {
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .command-box {
+            background-color: #f0f0f0;
+            border-left: 4px solid #666;
+        }
+        .output-box {
+            background-color: #f8f8f8;
+            border-left: 4px solid #999;
+        }
+        .explanation-box {
+            background-color: #f0f8ff;
+            border-left: 4px solid #4682b4;
+        }
+        .command-box h4, .output-box h4, .explanation-box h4 {
+            margin-top: 0;
+            color: #333;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 3px;
+            border: 1px solid #ddd;
+            overflow-x: auto;
+            font-family: Consolas, Monaco, 'Andale Mono', monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>LightLM System Detailed Workflow</h1>
+
+    <div class="diagram-container">
+        <div class="zoom-controls">
+            <div class="zoom-btn" id="zoom-out">-</div>
+            <div class="zoom-level" id="zoom-level">100%</div>
+            <div class="zoom-btn" id="zoom-in">+</div>
+            <button class="reset-btn" id="reset-view">Reset</button>
+        </div>
+        <div class="mermaid" id="diagram">
+        graph TD
+            %% Main components of the LightLM system with detailed steps
+
+            %% User Interface Section
+            UI["Training Setup Menu"]
+            UI -->|"1. Start Training"| TRAIN_START
+            UI -->|"2. Manage Config"| CONFIG_MENU
+            UI -->|"3. Exit"| EXIT
+
+            %% Configuration Menu
+            CONFIG_MENU["Configuration Menu"]
+            CONFIG_MENU -->|"1. Change Dataset"| DATASET_SELECT
+            CONFIG_MENU -->|"2. Load Config"| LOAD_CONFIG
+            CONFIG_MENU -->|"3. New Config"| NEW_CONFIG
+            CONFIG_MENU -->|"4. Save Config"| SAVE_CONFIG
+            CONFIG_MENU -->|"5. Optimize Time"| OPT_TIME
+            CONFIG_MENU -->|"6. Continue"| UI
+
+            %% Dataset Selection
+            DATASET_SELECT["Dataset Selection"]
+            DATASET_SELECT --> DS["Dataset Loading"]
+
+            %% Configuration Loading/Creation
+            LOAD_CONFIG --> TC["TrainerConfig"]
+            NEW_CONFIG --> MC["ModelConfig"]
+            SAVE_CONFIG --> CONFIG_FILE["last_config.json"]
+
+            %% Training Time Optimizer - Detailed Subgraph
+            subgraph "Training Time Optimizer"
+                OPT_TIME["Optimize for Time Target"]
+                OPT_TIME -->|"1. Analyze Hardware"| HW_ANALYSIS["Hardware Analysis"]
+                HW_ANALYSIS -->|"GPU Memory"| MEM_CALC["Memory Calculator"]
+                HW_ANALYSIS -->|"GPU Compute"| PERF_EST["Performance Estimator"]
+
+                MEM_CALC --> CONFIG_SELECTOR["Configuration Selector"]
+                PERF_EST --> CONFIG_SELECTOR
+
+                CONFIG_SELECTOR -->|"Ultra-fast (<0.01h)"| TINY_CONFIG["Tiny Config"]
+                CONFIG_SELECTOR -->|"Fast (0.01-0.1h)"| SMALL_CONFIG["Small Config"]
+                CONFIG_SELECTOR -->|"Medium (0.1-1h)"| MED_CONFIG["Medium Config"]
+                CONFIG_SELECTOR -->|"Large (>1h)"| LARGE_CONFIG["Large Config"]
+
+                TINY_CONFIG -->|"1 layer, 64 dim"| UPDATE_CONFIG
+                SMALL_CONFIG -->|"4 layers, 256 dim"| UPDATE_CONFIG
+                MED_CONFIG -->|"12 layers, 768 dim"| UPDATE_CONFIG
+                LARGE_CONFIG -->|"30 layers, 1024 dim"| UPDATE_CONFIG
+
+                UPDATE_CONFIG["Update Configurations"]
+                UPDATE_CONFIG -->|"Set model params"| MC
+                UPDATE_CONFIG -->|"Set training params"| TC
+                UPDATE_CONFIG -->|"Set subset size"| SUBSET
+            end
+
+            %% Data Pipeline - Detailed
+            subgraph "Data Pipeline"
+                DS -->|"Load dataset"| TOKENIZE["Tokenize Data"]
+                TOKENIZE -->|"Create batches"| TDL["ThreadedDataLoader"]
+                SUBSET["Subset Mode"] -->|"Filter samples"| TDL
+                TDL -->|"Queue batches"| Q["Data Queue"]
+                TOK["Tokenizer"] --> TOKENIZE
+            end
+
+            %% Model Architecture - Detailed
+            subgraph "Model Architecture"
+                TR["Transformer"]
+                TR -->|"Input"| EMB["Token Embeddings"]
+                EMB -->|"Embedded tokens"| BLOCKS["Transformer Blocks"]
+                BLOCKS -->|"Hidden states"| NORM["Layer Normalization"]
+                NORM -->|"Normalized states"| HEAD["Output Head"]
+
+                BLOCKS -->|"Contains"| ATT["Attention Layers"]
+                BLOCKS -->|"Contains"| FFN["Feed Forward Networks"]
+
+                ATT -->|"Self-attention"| ATT_OUT["Attention Output"]
+                FFN -->|"Process features"| FFN_OUT["FFN Output"]
+            end
+
+            %% Training Process - Detailed
+            subgraph "Training Process"
+                TRAIN_START["Start Training"]
+                TRAIN_START -->|"Initialize"| TRAIN["Trainer"]
+
+                TRAIN -->|"For each epoch"| EPOCH["Epoch Loop"]
+                EPOCH -->|"For each batch"| BATCH["Batch Processing"]
+
+                BATCH -->|"Forward pass"| FWD["Forward Propagation"]
+                FWD -->|"Calculate"| LOSS["Loss Calculation"]
+                LOSS -->|"Backward pass"| BWD["Backward Propagation"]
+                BWD -->|"Update weights"| OPT_STEP["Optimizer Step"]
+
+                OPT_STEP -->|"Next batch"| BATCH
+                BATCH -->|"End of epoch"| CKPT["Save Checkpoint"]
+            end
+
+            %% Generation Process - Detailed
+            subgraph "Generation Process"
+                GenUI["Text Generation Interface"]
+                GenUI -->|"Load model"| LOAD["Model Loading"]
+                LOAD -->|"Initialize"| GEN["Text Generation"]
+
+                GEN -->|"Tokenize prompt"| PROMPT["Process Prompt"]
+                PROMPT -->|"Generate tokens"| TOKEN_GEN["Token Generation"]
+                TOKEN_GEN -->|"For each new token"| TOKEN_LOOP["Token Loop"]
+
+                TOKEN_LOOP -->|"Forward pass"| GEN_FWD["Forward Pass"]
+                GEN_FWD -->|"Sample token"| SAMPLE["Token Sampling"]
+                SAMPLE -->|"Add to sequence"| APPEND["Append Token"]
+                APPEND -->|"Next token"| TOKEN_LOOP
+
+                TOKEN_LOOP -->|"Complete"| DECODE["Decode Output"]
+                DECODE -->|"Display"| OUTPUT["Generated Text"]
+            end
+
+            %% Main connections between components
+            TC --> TRAIN
+            MC --> TR
+
+            Q --> BATCH
+            TR --> FWD
+
+            CKPT --> LOAD
+            TOK --> PROMPT
+
+            %% Styling for different component types
+            classDef process fill:#f9f,stroke:#333,stroke-width:2px
+            classDef config fill:#bbf,stroke:#333,stroke-width:2px
+            classDef data fill:#bfb,stroke:#333,stroke-width:2px
+            classDef model fill:#fbb,stroke:#333,stroke-width:2px
+            classDef ui fill:#ffd,stroke:#333,stroke-width:2px
+
+            class UI,GenUI,CONFIG_MENU,DATASET_SELECT ui
+            class TC,MC,CONFIG_FILE,OPT_TIME,HW_ANALYSIS,MEM_CALC,PERF_EST,CONFIG_SELECTOR,TINY_CONFIG,SMALL_CONFIG,MED_CONFIG,LARGE_CONFIG,UPDATE_CONFIG config
+            class DS,TDL,TOK,Q,TOKENIZE,SUBSET data
+            class TR,ATT,FFN,EMB,BLOCKS,NORM,HEAD,ATT_OUT,FFN_OUT model
+            class TRAIN,TRAIN_START,EPOCH,BATCH,FWD,LOSS,BWD,OPT_STEP,CKPT,LOAD,GEN,PROMPT,TOKEN_GEN,TOKEN_LOOP,GEN_FWD,SAMPLE,APPEND,DECODE,OUTPUT process
+    </div>
+    </div>
+
+    <div class="legend">
+        <h3>Legend</h3>
+        <div class="legend-item"><span class="legend-color ui-color"></span> User Interface</div>
+        <div class="legend-item"><span class="legend-color config-color"></span> Configuration</div>
+        <div class="legend-item"><span class="legend-color data-color"></span> Data Pipeline</div>
+        <div class="legend-item"><span class="legend-color model-color"></span> Model Architecture</div>
+        <div class="legend-item"><span class="legend-color process-color"></span> Process</div>
+    </div>
+
+    <h2>Detailed Workflow Steps</h2>
+
+    <h3>1. User Interface</h3>
+    <ul>
+        <li><strong>Training Setup Menu</strong>: Main entry point with options to start training or manage configuration</li>
+        <li><strong>Configuration Menu</strong>: Provides options to change dataset, load/save configurations, and optimize for training time</li>
+        <li><strong>Text Generation Interface</strong>: Interface for loading trained models and generating text</li>
+    </ul>
+
+    <h3>2. Training Time Optimizer</h3>
+    <ul>
+        <li><strong>Hardware Analysis</strong>: Analyzes available GPU memory and compute capability</li>
+        <li><strong>Memory Calculator</strong>: Estimates memory requirements for different model sizes</li>
+        <li><strong>Performance Estimator</strong>: Estimates training speed based on hardware capabilities</li>
+        <li><strong>Configuration Selector</strong>: Selects appropriate configuration based on target training time:
+            <ul>
+                <li><strong>Ultra-fast</strong> (&lt;0.01h): 1 layer, 64 dimensions, 20 samples</li>
+                <li><strong>Fast</strong> (0.01-0.1h): 4 layers, 256 dimensions, 1000 samples</li>
+                <li><strong>Medium</strong> (0.1-1h): 12 layers, 768 dimensions, 5000 samples</li>
+                <li><strong>Large</strong> (&gt;1h): 30 layers, 1024 dimensions, full dataset</li>
+            </ul>
+        </li>
+        <li><strong>Update Configurations</strong>: Updates model and training configurations based on selection</li>
+    </ul>
+
+    <h3>3. Data Pipeline</h3>
+    <ul>
+        <li><strong>Dataset Loading</strong>: Loads dataset from disk or downloads from Hugging Face</li>
+        <li><strong>Subset Mode</strong>: Filters dataset to use only a subset of samples for faster training</li>
+        <li><strong>Tokenizer</strong>: Converts text to token IDs</li>
+        <li><strong>ThreadedDataLoader</strong>: Efficiently loads and processes data in multiple threads</li>
+        <li><strong>Data Queue</strong>: Maintains a queue of batches ready for training</li>
+    </ul>
+
+    <h3>4. Model Architecture</h3>
+    <ul>
+        <li><strong>Transformer</strong>: Main model class implementing a decoder-only transformer</li>
+        <li><strong>Token Embeddings</strong>: Converts token IDs to vector representations</li>
+        <li><strong>Transformer Blocks</strong>: Contains attention layers and feed-forward networks</li>
+        <li><strong>Attention Layers</strong>: Implements grouped-query attention mechanism</li>
+        <li><strong>Feed Forward Networks</strong>: Processes token representations</li>
+        <li><strong>Layer Normalization</strong>: Normalizes hidden states</li>
+        <li><strong>Output Head</strong>: Converts hidden states to token probabilities</li>
+    </ul>
+
+    <h3>5. Training Process</h3>
+    <ul>
+        <li><strong>Trainer</strong>: Manages the training loop</li>
+        <li><strong>Epoch Loop</strong>: Iterates through the entire dataset</li>
+        <li><strong>Batch Processing</strong>: Processes batches of data</li>
+        <li><strong>Forward Propagation</strong>: Passes input through the model</li>
+        <li><strong>Loss Calculation</strong>: Computes loss between predictions and targets</li>
+        <li><strong>Backward Propagation</strong>: Computes gradients</li>
+        <li><strong>Optimizer Step</strong>: Updates model weights</li>
+        <li><strong>Checkpointing</strong>: Saves model state periodically</li>
+    </ul>
+
+    <h3>6. Generation Process</h3>
+    <ul>
+        <li><strong>Model Loading</strong>: Loads trained model from checkpoint</li>
+        <li><strong>Text Generation</strong>: Generates text from a prompt</li>
+        <li><strong>Process Prompt</strong>: Tokenizes and processes the input prompt</li>
+        <li><strong>Token Generation</strong>: Generates new tokens one by one</li>
+        <li><strong>Token Loop</strong>: Iteratively generates each new token</li>
+        <li><strong>Forward Pass</strong>: Passes current sequence through the model</li>
+        <li><strong>Token Sampling</strong>: Samples next token based on model output</li>
+        <li><strong>Append Token</strong>: Adds new token to the sequence</li>
+        <li><strong>Decode Output</strong>: Converts generated token IDs back to text</li>
+        <li><strong>Generated Text</strong>: Final output text</li>
+    </ul>
+
+    <h2>Command Reference</h2>
+    <p>This section provides detailed commands for each step of the LightLM workflow, along with expected outputs.</p>
+
+    <div class="step-container">
+        <h3>1. System Setup</h3>
+        <div class="command-box">
+            <h4>Command:</h4>
+            <pre>python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt</pre>
+        </div>
+        <div class="output-box">
+            <h4>Expected Output:</h4>
+            <pre>Successfully installed torch transformers datasets rich ...</pre>
+        </div>
+        <div class="explanation-box">
+            <h4>Explanation:</h4>
+            <p>This sets up a virtual environment and installs all required dependencies for LightLM.</p>
+        </div>
+    </div>
+
+    <div class="step-container">
+        <h3>2. Training Configuration</h3>
+        <div class="command-box">
+            <h4>Command:</h4>
+            <pre>python train.py</pre>
+        </div>
+        <div class="output-box">
+            <h4>Expected Output:</h4>
+            <pre>System Check:
+✓ Python Version: Python 3.11 detected ✓
+✓ GPU Status: GPU detected ✓
+✓ Disk Space: Disk space: 22.0GB free ✓
+✓ RAM: RAM: 15.8GB ✓
+✓ Tokenizer loaded successfully
+
+Training Setup
+1. Start training
+2. Manage dataset/configuration
+3. Exit
+
+Select option (1-3):</pre>
+        </div>
+        <div class="explanation-box">
+            <h4>Explanation:</h4>
+            <p>The system performs hardware checks to ensure your system meets requirements. Select option 2 to manage dataset and configuration.</p>
+        </div>
+    </div>
+
+    <div class="step-container">
+        <h3>3. Dataset and Configuration Management</h3>
+        <div class="command-box">
+            <h4>Command:</h4>
+            <pre>2  # Select option 2 from previous menu</pre>
+        </div>
+        <div class="output-box">
+            <h4>Expected Output:</h4>
+            <pre>Dataset and Configuration Management
+1. Change dataset
+2. Load existing configuration
+3. Create new configuration
+4. Save current configuration
+5. Optimize for training time
+6. Continue with current settings
+7. Exit</pre>
+        </div>
+        <div class="explanation-box">
+            <h4>Explanation:</h4>
+            <p>Option 1: Change the dataset (default is wikitext)<br>
+            Option 5: Optimize configuration for specific training time</p>
+        </div>
+    </div>
+
+    <div class="step-container">
+        <h3>4. Training Time Optimization</h3>
+        <div class="command-box">
+            <h4>Command:</h4>
+            <pre>5  # Select option 5 from previous menu
+Enter desired training time in hours (e.g., 24.0): 0.001</pre>
+        </div>
+        <div class="output-box">
+            <h4>Expected Output:</h4>
+            <pre>Starting Comprehensive Configuration Optimization
+Target training time: 0.001000 hours
+
+Hardware Capabilities:
+→ Maximum batch size: 12
+→ Available GPU memory: 8.0GB
+→ Flash Attention support: False
+→ GPU Compute Capability: 6.1
+
+Optimizing for ultra-fast testing mode (sub-second)
+
+Speed Optimizations:
+→ Dataset: Using minimal subset (20 samples)
+→ Device transfers: Minimized for speed
+→ Memory tracking: Disabled for faster execution
+→ Minimized model architecture:
+  • Layers: 1
+  • Dimensions: 64
+  • Heads: 4
+
+Apply these optimizations? (y/n):</pre>
+        </div>
+        <div class="explanation-box">
+            <h4>Explanation:</h4>
+            <p>Enter a small value (e.g., 0.001) for ultra-fast testing. The system will optimize model size, batch size, and dataset size. Type 'y' to apply these optimizations.</p>
+        </div>
+    </div>
+
+    <div class="step-container">
+        <h3>5. Save Configuration</h3>
+        <div class="command-box">
+            <h4>Command:</h4>
+            <pre>4  # Select option 4 to save configuration</pre>
+        </div>
+        <div class="output-box">
+            <h4>Expected Output:</h4>
+            <pre>✓ Configuration saved successfully</pre>
+        </div>
+        <div class="explanation-box">
+            <h4>Explanation:</h4>
+            <p>This saves your configuration to last_config.json for future use.</p>
+        </div>
+    </div>
+
+    <div class="step-container">
+        <h3>6. Start Training</h3>
+        <div class="command-box">
+            <h4>Command:</h4>
+            <pre>6  # Select option 6 to continue with current settings
+1  # Select option 1 to start training</pre>
+        </div>
+        <div class="output-box">
+            <h4>Expected Output:</h4>
+            <pre>✓ Model initialized successfully
+Using subset of 20 samples
+Using subset mode: 20 samples out of 36718
+Subset mode active: Using only 20 samples with 5 steps per epoch
+✓ Data loader initialized with 5 steps per epoch
+
+Initializing Trainer:
+→ Device: cuda
+→ Model type: Transformer
+→ Tokenizer: GPT2TokenizerFast
+✓ Model moved to cuda
+✓ Optimizer initialized with lr=0.0005
+
+Starting training:
+→ Total steps: 5
+→ Steps per epoch: 5
+
+Epoch 1/1
+Step 1/5 | Loss: 10.5605 | Tokens/sec: 89.24 | Memory: 89MB used
+Step 2/5 | Loss: 5.1702 | Tokens/sec: 123.77 | Memory: 89MB used
+Step 3/5 | Loss: 5.1276 | Tokens/sec: 124.10 | Memory: 89MB used
+Step 4/5 | Loss: 5.0330 | Tokens/sec: 125.39 | Memory: 89MB used
+Step 5/5 | Loss: 5.0330 | Tokens/sec: 125.39 | Memory: 89MB used
+
+Saving checkpoint to ./model_testing\epoch_1
+✓ Checkpoint saved successfully
+
+Training completed successfully! Used 20 samples</pre>
+        </div>
+        <div class="explanation-box">
+            <h4>Explanation:</h4>
+            <p>The system initializes the model with the optimized configuration. It loads only 20 samples for ultra-fast training. Training completes in seconds with 5 steps. Model checkpoint is saved to model_testing/epoch_1/model.pt.</p>
+        </div>
+    </div>
+
+    <div class="step-container">
+        <h3>7. Text Generation</h3>
+        <div class="command-box">
+            <h4>Command:</h4>
+            <pre>python generate.py</pre>
+        </div>
+        <div class="output-box">
+            <h4>Expected Output:</h4>
+            <pre>Text Generation Interface
+Found model in model_testing\epoch_1
+
+Loading model from: model_testing\epoch_1\model.pt
+Model size: 12.24 MB
+
+Loading model...
+✓ Model loaded successfully from model_testing\epoch_1\model.pt
+
+Model Configuration:
+→ Vocab Size: 49152
+→ Context Length: 64
+→ Model Dimensions: 64
+→ Number of Layers: 1
+
+Enter your prompt (or 'quit' to exit):</pre>
+        </div>
+        <div class="explanation-box">
+            <h4>Explanation:</h4>
+            <p>The system finds and loads the trained model. Enter a prompt to generate text (e.g., "What is the meaning of life?"). The generated text will be random since the model was only trained on 20 samples.</p>
+        </div>
+    </div>
+
+    <div class="step-container">
+        <h3>8. Text Generation Example</h3>
+        <div class="command-box">
+            <h4>Command:</h4>
+            <pre>What is the meaning of life?</pre>
+        </div>
+        <div class="output-box">
+            <h4>Expected Output:</h4>
+            <pre>Generating...
+
+Generated text:
+What is the meaning of life? emancipation spawnedogel markers urging Antibspers dyesFold planners Methods wedham hundreds securitiesFourthtow propelled twenty Confederate Adolescentsidentiquedanchor ballistic chowedENCE skepticismriminals€™imates Chile calendar Academia...</pre>
+        </div>
+        <div class="explanation-box">
+            <h4>Explanation:</h4>
+            <p>The output is random because the model was only trained on 20 samples. For better results, train with more data and for longer time.</p>
+        </div>
+    </div>
+
+    <div class="step-container">
+        <h3>9. Training with More Data</h3>
+        <div class="command-box">
+            <h4>Command:</h4>
+            <pre>python train.py
+2  # Manage dataset/configuration
+5  # Optimize for training time
+Enter desired training time in hours (e.g., 24.0): 0.1</pre>
+        </div>
+        <div class="output-box">
+            <h4>Expected Output:</h4>
+            <pre>Starting Comprehensive Configuration Optimization
+Target training time: 0.100000 hours
+
+Speed Optimizations:
+→ Dataset: Using larger subset (1000 samples)
+→ Model architecture:
+  • Layers: 4
+  • Dimensions: 256
+  • Heads: 8</pre>
+        </div>
+        <div class="explanation-box">
+            <h4>Explanation:</h4>
+            <p>Using a longer training time (0.1 hours) will result in:<br>
+            - Larger dataset subset<br>
+            - Larger model architecture<br>
+            - Better quality generated text</p>
+        </div>
+    </div>
+
+    <div class="step-container">
+        <h3>10. Advanced Configuration</h3>
+        <div class="command-box">
+            <h4>Command:</h4>
+            <pre>python train.py
+2  # Manage dataset/configuration
+3  # Create new configuration</pre>
+        </div>
+        <div class="output-box">
+            <h4>Expected Output:</h4>
+            <pre>Model Configuration:
+1. Number of layers: 12
+2. Model dimensions: 768
+3. Number of attention heads: 12
+4. Context length: 1024
+5. Use Flash Attention: False
+6. Use Mixture of Experts: False
+7. Save and continue</pre>
+        </div>
+        <div class="explanation-box">
+            <h4>Explanation:</h4>
+            <p>This allows manual configuration of all model parameters. Larger values result in a more capable but slower-to-train model.</p>
+        </div>
+    </div>
+
+    <div class="step-container">
+        <h3>Troubleshooting</h3>
+        <div class="explanation-box">
+            <h4>Common Issues:</h4>
+            <ol>
+                <li><strong>Out of memory errors</strong>: Reduce model size or batch size</li>
+                <li><strong>Model not found</strong>: Check that the checkpoint path exists</li>
+                <li><strong>Slow training</strong>: Enable Flash Attention if supported by your GPU</li>
+                <li><strong>Poor generation quality</strong>: Train with more data and for longer time</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose',
+            flowchart: {
+                useMaxWidth: false,
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+
+        // Wait for Mermaid to render the diagram
+        $(document).ready(function() {
+            // Initialize zoom variables
+            let scale = 1;
+            const scaleStep = 0.1;
+            const minScale = 0.5;
+            const maxScale = 3;
+            let panX = 0;
+            let panY = 0;
+            let isDragging = false;
+            let startX, startY;
+
+            // Function to update the diagram's transform
+            function updateTransform() {
+                $('#diagram').css('transform', `translate(${panX}px, ${panY}px) scale(${scale})`);
+                $('#zoom-level').text(Math.round(scale * 100) + '%');
+            }
+
+            // Zoom in button
+            $('#zoom-in').click(function() {
+                if (scale < maxScale) {
+                    scale += scaleStep;
+                    updateTransform();
+                }
+            });
+
+            // Zoom out button
+            $('#zoom-out').click(function() {
+                if (scale > minScale) {
+                    scale -= scaleStep;
+                    updateTransform();
+                }
+            });
+
+            // Reset view button
+            $('#reset-view').click(function() {
+                scale = 1;
+                panX = 0;
+                panY = 0;
+                updateTransform();
+            });
+
+            // Mouse wheel zoom
+            $('.diagram-container').on('wheel', function(e) {
+                e.preventDefault();
+                const delta = e.originalEvent.deltaY;
+
+                // Calculate zoom center relative to diagram
+                const container = $('.diagram-container');
+                const containerOffset = container.offset();
+                const mouseX = e.pageX - containerOffset.left;
+                const mouseY = e.pageY - containerOffset.top;
+
+                // Calculate point under mouse in diagram coordinates
+                const pointX = (mouseX - panX) / scale;
+                const pointY = (mouseY - panY) / scale;
+
+                // Adjust scale
+                if (delta < 0 && scale < maxScale) {
+                    scale += scaleStep;
+                } else if (delta > 0 && scale > minScale) {
+                    scale -= scaleStep;
+                }
+
+                // Adjust pan to keep point under mouse
+                panX = mouseX - pointX * scale;
+                panY = mouseY - pointY * scale;
+
+                updateTransform();
+            });
+
+            // Pan with mouse drag
+            $('.diagram-container').mousedown(function(e) {
+                isDragging = true;
+                startX = e.pageX - panX;
+                startY = e.pageY - panY;
+                $('.diagram-container').css('cursor', 'grabbing');
+            });
+
+            $(document).mousemove(function(e) {
+                if (isDragging) {
+                    panX = e.pageX - startX;
+                    panY = e.pageY - startY;
+                    updateTransform();
+                }
+            });
+
+            $(document).mouseup(function() {
+                isDragging = false;
+                $('.diagram-container').css('cursor', 'default');
+            });
+
+            // Touch support using Hammer.js
+            const diagramContainer = document.querySelector('.diagram-container');
+            const hammer = new Hammer(diagramContainer);
+
+            hammer.get('pinch').set({ enable: true });
+            hammer.get('pan').set({ direction: Hammer.DIRECTION_ALL });
+
+            hammer.on('pinch', function(e) {
+                const newScale = Math.min(maxScale, Math.max(minScale, scale * e.scale));
+                scale = newScale;
+                updateTransform();
+            });
+
+            hammer.on('pan', function(e) {
+                panX = e.center.x - startX;
+                panY = e.center.y - startY;
+                updateTransform();
+            });
+
+            // Set initial height for diagram container
+            setTimeout(function() {
+                const diagramHeight = $('#diagram').height();
+                $('.diagram-container').css('height', diagramHeight + 50 + 'px');
+            }, 1000); // Wait for diagram to render
+        });
+    </script>
+</body>
+</html>
