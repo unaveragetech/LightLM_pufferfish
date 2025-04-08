@@ -95,17 +95,18 @@ pip install -r requirements.txt
 
 ### 1. Basic Training
 ```bash
-python train.py --quick-start
+python train.py 
 ```
 
 ### 2. Advanced Configuration
 ```bash
-python config_editor.py
+python train.py
+options
 ```
 
 ### 3. Text Generation
 ```bash
-python generate.py --model checkpoints/latest
+python generate.py 
 ```
 
 ## Core Architecture
