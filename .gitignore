@@ -1,0 +1,67 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Virtual environments
+/venv/
+/.venv/
+/env/
+/.env/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
+# Model files and checkpoints
+*.pt
+*.pth
+*.bin
+*.ckpt
+*.safetensors
+/model_testing/
+/outputs/
+/test_model/
+
+# Explicitly exclude large files
+outputs/simple_model/model.safetensors
+model_testing/unsloth_model/adapter_model.safetensors
+model_testing/unsloth_model/checkpoint-6/adapter_model.safetensors
+
+# Dataset files and caches
+/data/
+/datasets/
+/fineweb-edu_tok-10BT/
+/edu_fineweb1B/
+/edu_fineweb10B/
+
+# Unsloth cache files
+/unsloth_compiled_cache/
+
+# Logs and backups
+/logs/
+/backups/
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# Large files and directories
+*.gz
+*.zip
+*.tar
+*.rar
+*.7z
